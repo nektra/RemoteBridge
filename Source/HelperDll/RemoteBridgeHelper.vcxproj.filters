@@ -1,0 +1,423 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{a92a9df2-106a-4e99-ad05-a06146222c8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common\Com">
+      <UniqueIdentifier>{d10691bd-22b5-4bd2-9c95-8adbe4a3f444}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\COM">
+      <UniqueIdentifier>{ca8bdf03-303e-4270-abd8-5ce257a63a44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\COM\Asm">
+      <UniqueIdentifier>{a70cb04f-3b4f-48fa-9477-050edaa5d311}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\COM\Asm\Src">
+      <UniqueIdentifier>{ae6385ab-7e6e-48f1-9a77-3c5696616207}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Java">
+      <UniqueIdentifier>{c67e7a64-5925-4f6d-ad4c-1ef315f0c0d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Java\Asm">
+      <UniqueIdentifier>{43ae195b-7515-492d-a69e-ec1d9e06a9c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Java\Asm\Src">
+      <UniqueIdentifier>{0cfef90a-67a4-4754-9b10-1d1124de4788}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Common">
+      <UniqueIdentifier>{b37299ea-c2c7-4549-b3d2-af0a63fe18e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Common\Com">
+      <UniqueIdentifier>{ddfad07f-21fc-4352-9128-6c7eb717e043}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\COM">
+      <UniqueIdentifier>{8bfdfe93-997e-4948-95dd-887186eb75db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Java">
+      <UniqueIdentifier>{fa0d5655-a309-4a2e-9aa2-42bb07e76d3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="HookTrampoline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RemoteBridgeHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\ComPtr.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Debug.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\FnvHash.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\MemoryStream.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\SimplePipesIPC.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\StringLiteW.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Threads.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Tools.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\WaitableObjects.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Common\Com\VariantMisc.cpp">
+      <Filter>Source Files\Common\Com</Filter>
+    </ClCompile>
+    <ClCompile Include="Com\ComBaseRefCounter.cpp">
+      <Filter>Source Files\COM</Filter>
+    </ClCompile>
+    <ClCompile Include="Com\ComClassFactory.cpp">
+      <Filter>Source Files\COM</Filter>
+    </ClCompile>
+    <ClCompile Include="Com\ComClsIdIidList.cpp">
+      <Filter>Source Files\COM</Filter>
+    </ClCompile>
+    <ClCompile Include="Com\ComDll.cpp">
+      <Filter>Source Files\COM</Filter>
+    </ClCompile>
+    <ClCompile Include="Com\ComGuidList.cpp">
+      <Filter>Source Files\COM</Filter>
+    </ClCompile>
+    <ClCompile Include="Com\ComHelpers.cpp">
+      <Filter>Source Files\COM</Filter>
+    </ClCompile>
+    <ClCompile Include="Com\ComInstance.cpp">
+      <Filter>Source Files\COM</Filter>
+    </ClCompile>
+    <ClCompile Include="Com\ComInterface.cpp">
+      <Filter>Source Files\COM</Filter>
+    </ClCompile>
+    <ClCompile Include="Com\ComManager.cpp">
+      <Filter>Source Files\COM</Filter>
+    </ClCompile>
+    <ClCompile Include="Java\JavaClassCacheMgr.cpp">
+      <Filter>Source Files\Java</Filter>
+    </ClCompile>
+    <ClCompile Include="Java\JavaManager.cpp">
+      <Filter>Source Files\Java</Filter>
+    </ClCompile>
+    <ClCompile Include="Java\JavaObjectMgr.cpp">
+      <Filter>Source Files\Java</Filter>
+    </ClCompile>
+    <ClCompile Include="Java\JavaUtils.cpp">
+      <Filter>Source Files\Java</Filter>
+    </ClCompile>
+    <ClCompile Include="Java\JavaVarConvert.cpp">
+      <Filter>Source Files\Java</Filter>
+    </ClCompile>
+    <ClCompile Include="Java\JavaVarConvert_VariantInterchange.cpp">
+      <Filter>Source Files\Java</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RemoteBridgeHelper.def">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Com\Asm\CoUninitialize_x64.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\CoUninitialize_x86.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\DllGetClassObject_x64.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\DllGetClassObject_x86.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IClassFactory2_CreateInstanceLic_x64.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IClassFactory2_CreateInstanceLic_x86.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IClassFactory_CreateInstance_x64.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IClassFactory_CreateInstance_x86.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IUnknown_AddRef_x64.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IUnknown_AddRef_x86.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IUnknown_Generic_x64.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IUnknown_Generic_x86.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IUnknown_QueryInterface_x64.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IUnknown_QueryInterface_x86.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IUnknown_Release_x64.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\IUnknown_Release_x86.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\SHWeakReleaseInterface_x64.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Com\Asm\SHWeakReleaseInterface_x86.inl">
+      <Filter>Source Files\COM\Asm</Filter>
+    </None>
+    <None Include="Java\Asm\CreateJavaVM_x64.inl">
+      <Filter>Source Files\Java\Asm</Filter>
+    </None>
+    <None Include="Java\Asm\CreateJavaVM_x86.inl">
+      <Filter>Source Files\Java\Asm</Filter>
+    </None>
+    <None Include="Java\Asm\Native_RaiseCallback_x64.inl">
+      <Filter>Source Files\Java\Asm</Filter>
+    </None>
+    <None Include="Java\Asm\Native_RaiseCallback_x86.inl">
+      <Filter>Source Files\Java\Asm</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Java\JavaVarConvert_MarshalHelpers.h">
+      <Filter>Source Files\Java</Filter>
+    </ClInclude>
+    <ClInclude Include="Java\JavaVarConvert_UnmarshalHelpers.h">
+      <Filter>Source Files\Java</Filter>
+    </ClInclude>
+    <ClInclude Include="Java\JavaVarConvert_UnmarshalledJValues.h">
+      <Filter>Source Files\Java</Filter>
+    </ClInclude>
+    <ClInclude Include="AutoTls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CopyList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HookTrampoline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MainManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RemoteBridgeHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\AutoHandle.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\AutoPtr.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\ComPtr.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Debug.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Defines.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\FnvHash.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\LinkedList.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\MallocMacros.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\MemoryStream.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\SimplePipesIPC.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\StringLiteW.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Threads.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Tools.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\TransportMessages.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\WaitableObjects.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Common\Com\VariantMisc.h">
+      <Filter>Header Files\Common\Com</Filter>
+    </ClInclude>
+    <ClInclude Include="Com\ComBaseRefCounter.h">
+      <Filter>Header Files\COM</Filter>
+    </ClInclude>
+    <ClInclude Include="Com\ComClassFactory.h">
+      <Filter>Header Files\COM</Filter>
+    </ClInclude>
+    <ClInclude Include="Com\ComClsIdIidList.h">
+      <Filter>Header Files\COM</Filter>
+    </ClInclude>
+    <ClInclude Include="Com\ComDll.h">
+      <Filter>Header Files\COM</Filter>
+    </ClInclude>
+    <ClInclude Include="Com\ComGuidList.h">
+      <Filter>Header Files\COM</Filter>
+    </ClInclude>
+    <ClInclude Include="Com\ComHelpers.h">
+      <Filter>Header Files\COM</Filter>
+    </ClInclude>
+    <ClInclude Include="Com\ComInstance.h">
+      <Filter>Header Files\COM</Filter>
+    </ClInclude>
+    <ClInclude Include="Com\ComInterface.h">
+      <Filter>Header Files\COM</Filter>
+    </ClInclude>
+    <ClInclude Include="Com\ComManager.h">
+      <Filter>Header Files\COM</Filter>
+    </ClInclude>
+    <ClInclude Include="Java\JavaClassCacheMgr.h">
+      <Filter>Header Files\Java</Filter>
+    </ClInclude>
+    <ClInclude Include="Java\javainc.h">
+      <Filter>Header Files\Java</Filter>
+    </ClInclude>
+    <ClInclude Include="Java\JavaManager.h">
+      <Filter>Header Files\Java</Filter>
+    </ClInclude>
+    <ClInclude Include="Java\JavaObjectMgr.h">
+      <Filter>Header Files\Java</Filter>
+    </ClInclude>
+    <ClInclude Include="Java\JavaUtils.h">
+      <Filter>Header Files\Java</Filter>
+    </ClInclude>
+    <ClInclude Include="Java\JavaVarConvert.h">
+      <Filter>Header Files\Java</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RemoteBridgeHelper.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="Com\Asm\build32.bat">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\build64.bat">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\buildall.bat">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\CoUninitialize_x64.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\CoUninitialize_x86.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\DllGetClassObject_x64.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\DllGetClassObject_x86.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IClassFactory2_CreateInstanceLic_x64.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IClassFactory2_CreateInstanceLic_x86.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IClassFactory_CreateInstance_x64.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IClassFactory_CreateInstance_x86.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IUnknown_AddRef_x64.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IUnknown_AddRef_x86.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IUnknown_Generic_x64.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IUnknown_Generic_x86.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IUnknown_QueryInterface_x64.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IUnknown_QueryInterface_x86.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IUnknown_Release_x64.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\IUnknown_Release_x86.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\SHWeakReleaseInterface_x64.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Com\Asm\SHWeakReleaseInterface_x86.asm">
+      <Filter>Source Files\COM\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Java\Asm\build32.bat">
+      <Filter>Source Files\Java\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Java\Asm\build64.bat">
+      <Filter>Source Files\Java\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Java\Asm\buildall.bat">
+      <Filter>Source Files\Java\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Java\Asm\CreateJavaVM_x64.asm">
+      <Filter>Source Files\Java\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Java\Asm\CreateJavaVM_x86.asm">
+      <Filter>Source Files\Java\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Java\Asm\Native_RaiseCallback_x64.asm">
+      <Filter>Source Files\Java\Asm\Src</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Java\Asm\Native_RaiseCallback_x86.asm">
+      <Filter>Source Files\Java\Asm\Src</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

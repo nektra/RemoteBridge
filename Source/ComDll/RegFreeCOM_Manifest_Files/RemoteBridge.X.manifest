@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+	<assemblyIdentity type="win32" name="RemoteBridge" version="1.0.0.0" processorArchitecture="x86" />
+	<file name="RemoteBridge.dll" hashalg="SHA1">
+		<comClass clsid="{D418B9B0-D11C-42af-A951-B3369680E080}" tlbid="{AAAB0FBF-AD81-430d-A137-2BB487A0D9FD}" description="NktRemoteBridge Class" threadingModel="Neutral"/>
+		<comClass clsid="{7EDFEE7F-6458-4107-8344-518BE2980733}" tlbid="{AAAB0FBF-AD81-430d-A137-2BB487A0D9FD}" description="NktProcessMemory Class" threadingModel="Neutral"/>
+		<comClass clsid="{234D451D-DED1-4320-95B0-D22F846726DF}" tlbid="{AAAB0FBF-AD81-430d-A137-2BB487A0D9FD}" description="NktJavaObject Class" threadingModel="Neutral"/>
+		<typelib tlbid="{AAAB0FBF-AD81-430d-A137-2BB487A0D9FD}" resourceid="1" version="1.0" helpdir="" flags="HASDISKIMAGE"></typelib>
+	</file>
+	<comInterfaceExternalProxyStub name="INktRemoteBridge" iid="{EA2E0631-552D-4f3c-9F52-4F080B61CFF0}" tlbid="{AAAB0FBF-AD81-430d-A137-2BB487A0D9FD}" baseInterface="{00000000-0000-0000-C000-000000000046}" proxyStubClsid32="{00020424-0000-0000-C000-000000000046}"/>
+	<comInterfaceExternalProxyStub name="INktProcessMemory" iid="{490A2906-2BF7-44b0-920B-9133800E2EBD}" tlbid="{AAAB0FBF-AD81-430d-A137-2BB487A0D9FD}" baseInterface="{00000000-0000-0000-C000-000000000046}" proxyStubClsid32="{00020424-0000-0000-C000-000000000046}"/>
+	<comInterfaceExternalProxyStub name="INktJavaObject" iid="{BE743FBA-5402-4e06-92B3-B32FEE4C9BA9}" tlbid="{AAAB0FBF-AD81-430d-A137-2BB487A0D9FD}" baseInterface="{00000000-0000-0000-C000-000000000046}" proxyStubClsid32="{00020424-0000-0000-C000-000000000046}"/>
+</assembly>

@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		'%APPID%' = s 'RemoteBridge'
+		'RemoteBridge64.DLL'
+		{
+			val AppID = s '%APPID%'
+		}
+	}
+}

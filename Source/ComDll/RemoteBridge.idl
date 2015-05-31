@@ -1,0 +1,1322 @@
+﻿/*
+ * Copyright (C) 2010-2015 Nektra S.A., Buenos Aires, Argentina.
+ * All rights reserved. Contact: http://www.nektra.com
+ *
+ *
+ * This file is part of Remote Bridge
+ *
+ *
+ * Commercial License Usage
+ * ------------------------
+ * Licensees holding valid commercial Remote Bridge licenses may use this
+ * file in accordance with the commercial license agreement provided with
+ * the Software or, alternatively, in accordance with the terms contained
+ * in a written agreement between you and Nektra.  For licensing terms and
+ * conditions see http://www.nektra.com/licensing/. Use the contact form
+ * at http://www.nektra.com/contact/ for further information.
+ *
+ *
+ * GNU General Public License Usage
+ * --------------------------------
+ * Alternatively, this file may be used under the terms of the GNU General
+ * Public License version 3.0 as published by the Free Software Foundation
+ * and appearing in the file LICENSE.GPL included in the packaging of this
+ * file.  Please visit http://www.gnu.org/copyleft/gpl.html and review the
+ * information to ensure the GNU General Public License version 3.0
+ * requirements will be met.
+ *
+ **/
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+//VERY IMPORTANT NOTE: I don't know the reason (may be the inheritance of interfaces) but the
+//-------------------  proxy/stub code generated is broken with the default /Oicf MIDL compiler
+//                     switch. BE SURE to add "/Os" to the additional options in the MIDL settings.
+//                     Also set the "Generate stubless proxy" to NO and put inside a comment the
+//                     "#define USE_STUBLESS_PROXY" sentence in 'DllDataX.c'
+//                     With these settings now an object can be successfully marshaled between
+//                     two STA threads.
+
+#include "idl_size_t.h"
+#include "disp_ids.h"
+
+#define MY_VARIANT_FALSE   0 //avoid midl compiler errors
+#define MY_VARIANT_TRUE   -1 //in defaultvalue values
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+
+interface INktRemoteBridge;
+interface INktProcessMemory;
+interface INktJavaObject;
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+
+/**
+ * \file RemoteBridge.idl
+ * \enum eNktProtection
+ * \brief Represents memory page protection attributes.\n
+ *        For detailed information on memory management, visit
+ *        <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa366779(v=vs.85).aspx">this link</a>.
+ */
+typedef [v1_enum] enum eNktProtection {
+  /// Enables code execution in the committed region of pages.
+  protExecute      = 0x01,
+  /// Enables memory reading in the committed region of pages.
+  protRead         = 0x02,
+  /// Allows memory writing in the committed region of pages.
+  protWrite        = 0x04,
+  /// Mark the committed region of pages as <a href="http://en.wikipedia.org/wiki/Copy-on-write">copy-on-write</a>.
+  protIsWriteCopy  = 0x08,
+  /// Mark the committed region of pages as <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa366549(v=vs.85).aspx">guarded</a>.
+  protGuard        = 0x10,
+  /// Indicates that the committed region of pages are not cacheable.
+  protNoCache      = 0x20,
+  /// Mark the committed region of pages as <a href="http://en.wikipedia.org/wiki/Write-combining">write-combine</a>.
+  protWriteCombine = 0x40
+} eNktProtection;
+
+/**
+ * \file RemoteBridge.idl
+ * \enum eNktHookFlags
+ * \brief Setup miscellaneous hooking options.
+ */
+typedef [v1_enum] enum eNktHookFlags {
+  /// Allows a hooked process to send debug data about intercepted interfaces.
+  flgDebugPrintInterfaces = 0x0001,
+  /// Disables COM hooking for the specified process.
+  flgDisableComHooking = 0x0002,
+  /// Disables JAVA hooking for the specified process.
+  flgDisableJavaHooking = 0x0004
+} eNktHookFlags;
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+
+/**
+ * \interface INktRemoteBridge
+ *
+ * \brief Main interface for process hooking and interception.
+ */
+[
+  object,
+  uuid(EA2E0631-552D-4f3c-9F52-4F080B61CFF0),
+  dual, oleautomation, local,
+  nonextensible,
+  helpstring("INktRemoteBridge Interface"),
+  pointer_default(unique)
+]
+interface INktRemoteBridge : IDispatch
+{
+  /**
+   * \brief Hook and monitor a process.
+   *
+   * \param procId The id of the process to hook.
+   * \param flags  A set of hook flags that modifies hooking behavior.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeHook),
+   helpstring("Hook and monitor a process")]
+  HRESULT Hook([in] LONG procId, [in] eNktHookFlags flags);
+
+  /**
+   * \brief Unhook and stop monitoring a process.
+   *
+   * \param procId The id of the process to unhook.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeUnhook),
+   helpstring("Unhook and stop monitoring a process")]
+  HRESULT Unhook([in] LONG procId);
+
+  /**
+   * \brief Unhook and stop monitoring all processes.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeUnhookAll),
+   helpstring("Unhook and stop monitoring all processes")]
+  HRESULT UnhookAll();
+
+  /**
+   * \brief Watch all instance's creation of a COM interface.
+   *
+   * \param procId The id of the process which object instances should be watched.
+   * \param clsid  The class id of the objects to watch. Pass "{00000000-0000-0000-0000-000000000000}" to
+   *               watch on all classes ids.
+   * \param iid    The interface id of the objects to watch. Pass "{00000000-0000-0000-0000-000000000000}" to
+   *               watch on all interfaces ids.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeWatchComInterface),
+   helpstring("Watch all instance's creation of a COM interface")]
+  HRESULT WatchComInterface([in] LONG procId, [in] BSTR clsid, [in] BSTR iid);
+
+  /**
+   * \brief Finish watching instance's creation of a COM interface.
+   *
+   * \param procId The id of the process which object instances should be unwatched.
+   * \param clsid  The class id of the objects to stop watching. Pass "{00000000-0000-0000-0000-000000000000}" to
+   *               stop watching on all classes ids.
+   * \param iid    The interface id of the objects to stop watching. Pass "{00000000-0000-0000-0000-000000000000}" to
+   *               stop watching on all interfaces ids.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeUnwatchComInterface),
+   helpstring("Finish watching instance's creation of a COM interface")]
+  HRESULT UnwatchComInterface([in] LONG procId, [in] BSTR clsid, [in] BSTR iid);
+
+  /**
+   * \brief Finish watching all COM instance's creation.
+   *
+   * \param procId The id of the process which all object instances should be unwatched.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeUnwatchAllComInterfaces),
+   helpstring("Finish watching all COM instance's creation")]
+  HRESULT UnwatchAllComInterfaces([in] LONG procId);
+
+  /**
+   * \brief Find an interface object that belongs to the provided window handle.
+   *
+   * \param procId The id of the process to look for the object.
+   * \param hWnd   A window handle to look for.
+   * \param iid    The interface identifier of the object to return.
+   * \param ppUnk  Return the matching object if found.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeGetComInterfaceFromHWnd),
+   helpstring("Find an interface object that belongs to the provided window handle")]
+  HRESULT GetComInterfaceFromHwnd([in] LONG procId, [in] my_ssize_t hWnd, [in] BSTR iid, [out,retval] IUnknown **ppUnk);
+
+  /**
+   * \brief Obtain an interface object from an enumerated array of objects.
+   *
+   * \param procId The id of the process to look for the object.
+   * \param iid    The interface identifier of the object to return.
+   * \param index  A zero-based index in the array of watched instances.
+   * \param ppUnk  Return the matching object if found.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeGetComInterfaceFromIndex),
+   helpstring("Obtain an interface object from an enumerated array of objects")]
+  HRESULT GetComInterfaceFromIndex([in] LONG procId, [in] BSTR iid, [in] int index, [out,retval] IUnknown **ppUnk);
+
+  /**
+   * \brief Hook a specific interface method in order to watch returned interfaces.
+   *
+   * \param procId                The id of the process to look for the object.
+   * \param iid                   The identifier of the interface to hook.
+   * \param methodIndex           A zero-based index to the method in the interface v-table.
+   * \param iidParamStringOrIndex A string specifing the interface id returned by the method or an index to the
+   *                              parameter that will contain the interface id when the object is returned.
+   * \param returnParamIndex      The index of the parameter that return the object pointer. Use -1 if the object is
+   *                              returned as a result of the method instead of an output parameter.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeHookComInterfaceMethod),
+   helpstring("Hook a specific interface method in order to watch returned interfaces")]
+  HRESULT HookComInterfaceMethod([in] LONG procId, [in] BSTR iid, [in] int methodIndex,
+                                 [in] VARIANT iidParamStringOrIndex, [in] int returnParamIndex);
+
+  /**
+   * \brief Find a window handle in a remote process.
+   *
+   * \param procId        The id of the process to look for the window.
+   * \param hParentWnd    The parent window to begin scan. Use 0 to scan for all process' windows.
+   * \param wndName       An optional window name to match.
+   * \param className     An optional window class name to match.
+   * \param recurseChilds True to expand search into child windows.
+   * \param hWnd          Return the window's handle if found.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeFindWindow),
+   helpstring("Find a window handle in a remote process")]
+  HRESULT FindWindow([in] LONG procId, [in] my_ssize_t hParentWnd, [in] BSTR wndName, [in] BSTR className,
+                     [in, defaultvalue(MY_VARIANT_FALSE)] VARIANT_BOOL recurseChilds,
+                     [out,retval] my_ssize_t *hWnd);
+
+  /**
+   * \brief Get the text/caption of a window in a remote process.
+   *
+   * \param procId The id of the process that owns the window.
+   * \param hWnd   The window handle which the text will be retrieved.
+   * \param text   Return the current text/caption of the given window.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeWindowText), propget,
+   helpstring("Get/Set the text of a remote process' window")]
+  HRESULT WindowText([in] LONG procId, [in] my_ssize_t hWnd, [out,retval] BSTR *text);
+
+  /**
+   * \brief Set the text/caption of a window in a remote process.
+   *
+   * \param procId The id of the process that owns the window.
+   * \param hWnd   The window handle which the text will be set.
+   * \param text   The text to set.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeWindowText), propput,
+   helpstring("Get/Set the text of a remote process' window")]
+  HRESULT WindowText([in] LONG procId, [in] my_ssize_t hWnd, [in] BSTR text);
+
+  /**
+   * \brief Send a message to a window and wait until processed.
+   *
+   * \param procId The id of the process that owns the window.
+   * \param hWnd   The handle of window that will receive the message.
+   * \param msg    The message code.
+   * \param wParam The message's wParam value.
+   * \param lParam The message's lParam value.
+   * \param result Will hold the returned value after the message is processed.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeSendMessage),
+   helpstring("Send a message to a window and wait until processed")]
+  HRESULT SendMessage([in] LONG procId, [in] my_ssize_t hWnd, [in] LONG msg, [in] my_ssize_t wParam,
+                      [in] my_ssize_t lParam, [out,retval] my_ssize_t *result);
+
+  /**
+   * \brief Send a message to a window  and return if the specified timeout expires.
+   *
+   * \param procId  The id of the process that owns the window.
+   * \param hWnd    The handle of window that will receive the message.
+   * \param msg     The message code.
+   * \param wParam  The message's wParam value.
+   * \param lParam  The message's lParam value.
+   * \param timeout The amount of time to wait to the message to be processed is milliseconds.
+   * \param result  Will hold the returned value after the message is processed.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeSendMessageTimeout),
+   helpstring("Send a message to a window and return if the specified timeout expires.")]
+  HRESULT SendMessageTimeout([in] LONG procId, [in] my_ssize_t hWnd, [in] LONG msg, [in] my_ssize_t wParam,
+                             [in] my_ssize_t lParam, [in] LONG timeout, [out,retval] my_ssize_t *result);
+
+  /**
+   * \brief Post a message to a window  and return inmmediately.
+   *
+   * \param procId  The id of the process that owns the window.
+   * \param hWnd    The handle of window that will receive the message.
+   * \param msg     The message code.
+   * \param wParam  The message's wParam value.
+   * \param lParam  The message's lParam value.
+   * \param result  Return true if the message was queued successfully.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgePostMessage),
+   helpstring("Post a message to a window and return inmmediately.")]
+  HRESULT PostMessage([in] LONG procId, [in] my_ssize_t hWnd, [in] LONG msg, [in] my_ssize_t wParam,
+                      [in] my_ssize_t lParam, [out,retval] VARIANT_BOOL *result);
+
+  /**
+   * \brief Retrieve the Nth child window of a given parent.
+   *
+   * \param procId     The id of the process that owns the window.
+   * \param hParentWnd The handle of the parent window which its child will be retrieved.
+   * \param index      Zero-based index of the child window.
+   * \param hWnd       Return the window's handle if found.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeGetChildWindow),
+   helpstring("Retrieve the Nth child window of a given parent")]
+  HRESULT GetChildWindow([in] LONG procId, [in] my_ssize_t hParentWnd, [in] LONG index, [out,retval] my_ssize_t *hWnd);
+
+  /**
+   * \brief Find a window that matches an id.
+   *
+   * \param procId     The id of the process that owns the window.
+   * \param hParentWnd The handle of the parent window which its child will be retrieved.
+   * \param ctrlId     Id of the control to match.
+   * \param hWnd       Return the window's handle if found.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [id(dispidNktRemoteBridgeGetChildWindowFromId),
+   helpstring("Find a window that matches an id")]
+  HRESULT GetChildWindowFromId([in] LONG procId, [in] my_ssize_t hParentWnd, [in] LONG ctrlId,
+                               [out,retval] my_ssize_t *hWnd);
+
+  /**
+   * \brief Get a memory manager object for the specified process.
+   *
+   * \param procId    The id of the process which memory will be accessed.
+   * \param ppProcMem Return an instance of the memory manager.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Get a memory manager object for the specified process"),
+   id(dispidNktRemoteBridgeProcessMemory)]
+  HRESULT Memory([in] LONG procId, [out, retval] INktProcessMemory **ppProcMem);
+
+  /**
+   * \brief Create a new process and, optionally, suspend it in order to be able to hook from start.
+   *
+   * \param imagePath     A string that contains the full name of the executable file to run.
+   * \param suspended     True if the process should start in a suspended state.
+   * \param continueEvent Return a resume handle to use with INktRemoteBridge::ResumeProcess to continue process
+   *                      execution.
+   * \param procId        Return the id of the newly created process.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Create a new process and, optionally, suspend it in order to be able to hook from start"),
+   id(dispidNktRemoteBridgeCreateProcess)]
+  HRESULT CreateProcess([in] BSTR imagePath, [in, defaultvalue(MY_VARIANT_FALSE)] VARIANT_BOOL suspended,
+                        [out, defaultvalue(NULL)] VARIANT *continueEvent, [out, retval] LONG *procId);
+
+  /**
+   * \brief Create a new process with logon credentials, optionally, suspend it in order to be able to hook from start.
+   *
+   * \param imagePath     A string that contains the full name of the executable file to run.
+   * \param userName      The name of the user account to log on.
+   * \param password      The clear-text password for the userName account.
+   * \param suspended     True if the process should start in a suspended state.
+   * \param continueEvent Return a resume handle to use with INktRemoteBridge::ResumeProcess to continue process
+   *                      execution.
+   * \param procId        Return the id of the newly created process.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Create a new process with logon credentials, optionally, suspend it in order to be able to"
+              "hook from start"),
+   id(dispidNktRemoteBridgeCreateProcessWithLogon)]
+  HRESULT CreateProcessWithLogon([in] BSTR imagePath, [in] BSTR userName, [in] BSTR password,
+                                 [in, defaultvalue(MY_VARIANT_FALSE)] VARIANT_BOOL suspended,
+                                 [out, defaultvalue(NULL)] VARIANT *continueEvent, [out, retval] LONG *procId);
+
+  /**
+   * \brief Resume a suspended that was recently created.
+   *
+   * \param procId        The id of the process to resume its execution.
+   * \param continueEvent An object retrieved in a previous call to INktRemoteBridge::CreateProcess and/or
+   *                      INktRemoteBridge::CreateProcessWithLogon.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Resume a suspended that was recently created"),
+   id(dispidNktRemoteBridgeResumeProcess)]
+  HRESULT ResumeProcess([in] LONG procId, [in] VARIANT continueEvent);
+
+  /**
+   * \brief Terminate an existing running process.
+   *
+   * \param procId   The id of the process to kill.
+   * \param exitCode The exit code value to set.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Terminate an existing running process"),
+   id(dispidNktRemoteBridgeTerminateProcess)]
+  HRESULT TerminateProcess([in] LONG procId, [in] LONG exitCode);
+
+  /**
+   * \brief Close a resume handle.
+   *
+   * \param h The resume handle to close.
+   *
+   * If a suspended process is created but the execution is not resumed, use this method to close the resume-handle
+   * and avoid resource leaks.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Close a resume handle"),
+   id(dispidNktRemoteBridgeCloseHandle)]
+  HRESULT CloseHandle([in] VARIANT h);
+
+  /**
+   * \brief Invoke a COM method in an IDispatch compatible interface.
+   *
+   * \param unk        The interface which the method will be invoked.
+   * \param methodName The name of the method to invoke.
+   * \param parameters An optional array of parameters.
+   * \param result     Will hold the result of the method call.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Invoke a COM method in an IDispatch derived interface"),
+   id(dispidNktRemoteBridgeInvokeComMethod)]
+  HRESULT InvokeComMethod([in] IUnknown *unk, [in] BSTR methodName, [in] VARIANT parameters,
+                          [out,retval] VARIANT *result);
+
+  /**
+   * \brief Get the value of a property in an IDispatch derived interface.
+   *
+   * \param unk          The object's instance which the property will be retrieve.
+   * \param propertyName The name of the property to retrieve.
+   * \param value        Return the property's value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Set/Get the value of a property in an IDispatch derived interface"),
+   id(dispidNktRemoteBridgeSetGetComProperty)]
+  HRESULT ComProperty([in] IUnknown *unk, [in] BSTR propertyName, [out,retval] VARIANT *value);
+
+  /**
+   * \brief Set the value of a property in an IDispatch derived interface.
+   *
+   * \param unk          The object's instance which the property will be set.
+   * \param propertyName The name of the property to set.
+   * \param newValue     The value to set.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Set/Get the value of a property in an IDispatch derived interface"),
+   id(dispidNktRemoteBridgeSetGetComProperty)]
+  HRESULT ComProperty([in] IUnknown *unk, [in] BSTR propertyName, [in] VARIANT newValue);
+
+  /**
+   * \brief Get the value of a parameterized property in an IDispatch derived interface.
+   *
+   * \param unk          The object's instance which the property will be retrieve.
+   * \param propertyName The name of the property to retrieve.
+   * \param parameters   An array of parameters.
+   * \param value        Return the property's value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Set/Get the value of a parameterized property in an IDispatch derived interface"),
+   id(dispidNktRemoteBridgeSetGetComPropertyWithParams)]
+  HRESULT ComPropertyWithParams([in] IUnknown *unk, [in] BSTR propertyName, [in] VARIANT parameters,
+                                [out,retval] VARIANT *value);
+
+  /**
+   * \brief Set the value of a parameterized property in an IDispatch derived interface.
+   *
+   * \param unk          The object's instance which the property will be set.
+   * \param propertyName The name of the property to set.
+   * \param parameters   An array of parameters.
+   * \param newValue     The value to set.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Set/Get the value of a parameterized property in an IDispatch derived interface"),
+   id(dispidNktRemoteBridgeSetGetComPropertyWithParams)]
+  HRESULT ComPropertyWithParams([in] IUnknown *unk, [in] BSTR propertyName, [in] VARIANT parameters,
+                                [in] VARIANT newValue);
+
+  /**
+   * \brief Define and implements a new Java class from a byte stream.
+   *
+   * \param procId    The id of the process which the java class will be defined.
+   * \param className The name of the new java class.
+   * \param byteCode  An array of bytes that defines the class implementation as a compiled byte-code.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Define and implements a new Java class from a byte stream"),
+   id(dispidNktRemoteBridgeDefineJavaClass)]
+  HRESULT DefineJavaClass([in] LONG procId, [in] BSTR className, [in] VARIANT byteCode);
+
+  /**
+   * \brief Create a new Java object and return a Java object accessor.
+   *
+   * \param procId          The id of the process which the java object instance be create.
+   * \param className       The name of the class.
+   * \param constructorArgs An optional array of parameters to pass to the class' constructor.
+   * \param ppJavaObj       Return the instace of the newly created java object.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Create a new Java object and return a Java object accessor"),
+   id(dispidNktRemoteBridgeCreateJavaObject)]
+  HRESULT CreateJavaObject([in] LONG procId, [in] BSTR className, [in] VARIANT constructorArgs,
+                           [out,retval] INktJavaObject **ppJavaObj);
+
+  /**
+   * \brief Invoke a Java static method and return the result.
+   *
+   * \param procId     The id of the process which the java's static method will be invoked.
+   * \param className  The name of the class.
+   * \param methodName The name of the class' method to invoke.
+   * \param parameters An optional array of parameters to pass to the method.
+   * \param result     Return the result of the method call if any.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Invoke a Java static method and return the result"),
+   id(dispidNktRemoteBridgeInvokeJavaStaticMethod)]
+  HRESULT InvokeJavaStaticMethod([in] LONG procId, [in] BSTR className, [in] BSTR methodName,
+                                 [in] VARIANT parameters, [out,retval] VARIANT *result);
+
+  /**
+   * \brief Get the value of a Java object's static field.
+   *
+   * \param procId    The id of the process which the java's static property will be set.
+   * \param className The name of the class.
+   * \param fieldName The name of the class' field to set.
+   * \param value     Return the current field's value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Sets/Gets a Java object's static field"),
+   id(dispidNktRemoteBridgeSetGetStaticJavaField)]
+  HRESULT StaticJavaField([in] LONG procId, [in] BSTR className, [in] BSTR fieldName, [out,retval] VARIANT *value);
+
+  /**
+   * \brief Set the value of a Java object's static field.
+   *
+   * \param procId    The id of the process which the java's static property will be set.
+   * \param className The name of the class.
+   * \param fieldName The name of the class' field to set.
+   * \param newValue  The new value to set.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Set/Get the value of a Java object's static field"),
+   id(dispidNktRemoteBridgeSetGetStaticJavaField)]
+  HRESULT StaticJavaField([in] LONG procId, [in] BSTR className, [in] BSTR fieldName, [in] VARIANT newValue);
+
+  /**
+   * \brief Check if a Java Virtual Machine is attached to the target process.
+   *
+   * \param procId   The id of the process to ask if JVM is active.
+   * \param verMajor Return the JVM's major version.
+   * \param verMinor Return the JVM's minor version.
+   * \param isActive Return true if the JVM is active.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Check if a Java Virtual Machine is attached to the target process"),
+   id(dispidNktRemoteBridgeIsJVMAttached)]
+  HRESULT IsJVMAttached([in] LONG procId, [out] LONG *verMajor, [out] LONG *verMinor,
+                        [out,retval] VARIANT_BOOL *isActive);
+};
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+
+/**
+ * \interface INktProcessMemory
+ *
+ * \brief Interface for memory management in a specified process.
+ */
+[
+  object,
+  uuid(490A2906-2BF7-44b0-920B-9133800E2EBD),
+  dual, oleautomation, local,
+  nonextensible,
+  helpstring("INktProcessMemory Interface"),
+  pointer_default(unique)
+]
+interface INktProcessMemory : IDispatch
+{
+  /**
+   * \brief Get the protection flags of a remote address.
+   *
+   * \param remoteAddr The remote address to query.
+   * \param prot       Returns the access protection of the pages in the region.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Get the protection flags of a remote address"),
+   id(dispidNktProcessMemoryGetProtection)]
+  HRESULT GetProtection([in] my_ssize_t remoteAddr, [out, retval] eNktProtection *prot);
+
+  /**
+   * \brief Read a bulk of bytes from a remote process.
+   *
+   * \param localAddr  A pointer to a local buffer.
+   * \param remoteAddr The remote address from which to read.
+   * \param bytes      The number of bytes to read.
+   * \param readed     Returns the number of bytes readed.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Read a bulk of bytes from the remote process"),
+   id(dispidNktProcessMemoryReadMem)]
+  HRESULT ReadMem([in] my_ssize_t localAddr, [in] my_ssize_t remoteAddr, [in] my_ssize_t bytes,
+                  [out, retval] my_ssize_t *readed);
+
+  /**
+   * \brief Write a bulk of bytes in the remote process.
+   *
+   * \param remoteAddr The remote address from which to write.
+   * \param localAddr  A pointer to a local buffer.
+   * \param bytes      The number of bytes to read.
+   * \param written    Returns the number of written bytes.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Write a bulk of bytes in the remote process"),
+   id(dispidNktProcessMemoryWriteMem)]
+  HRESULT WriteMem([in] my_ssize_t remoteAddr, [in] my_ssize_t localAddr, [in] my_ssize_t bytes,
+                   [out, retval] my_ssize_t *written);
+
+  /**
+   * \brief Write a value or array of values in the remote process.
+   *
+   * \param remoteAddr The remote address from which to write.
+   * \param var        The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Write data or array of data in the remote process"),
+   id(dispidNktProcessMemoryWrite)]
+  HRESULT Write([in] my_ssize_t remoteAddr, [in] VARIANT var);
+
+  /**
+   * \brief Read an ansi/wide string from the remote process.
+   *
+   * \param remoteAddr The remote address from which to read the string.
+   * \param isAnsi     True if reading an Ansi string.
+   * \param val        Returns the readed string.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Read an ansi/wide string from the remote process"),
+   id(dispidNktProcessMemoryReadString)]
+  HRESULT ReadString([in] my_ssize_t remoteAddr, [in] VARIANT_BOOL isAnsi, [out, retval] BSTR *val);
+
+  /**
+   * \brief Read an ansi/wide string from the remote process specifying the maximum number of chars.
+   *
+   * \param remoteAddr The remote address from which to read the string.
+   * \param isAnsi     True if reading an Ansi string.
+   * \param maxChars   The maximum number of characters to read.
+   * \param val        Returns the readed string.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Read an ansi/wide string from the remote process and specify the maximum number of chars"),
+   id(dispidNktProcessMemoryReadStringN)]
+  HRESULT ReadStringN([in] my_ssize_t remoteAddr, [in] VARIANT_BOOL isAnsi, [in] LONG maxChars,
+                      [out, retval] BSTR *val);
+
+  /**
+   * \brief Write an ansi/wide string in the remote process.
+   *
+   * \param remoteAddr The remote address from which to write the string.
+   * \param str        The string to write.
+   * \param asAnsi     Indicates if the string must be written as an Ansi or Wide string.
+   * \param writeNul   Indicates if the terminating NUL char must be written too.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Write an ansi/wide string in the remote process"),
+   id(dispidNktProcessMemoryWriteString)]
+  HRESULT WriteString([in] my_ssize_t remoteAddr, [in] BSTR str, [in] VARIANT_BOOL asAnsi,
+                      [in, defaultvalue(MY_VARIANT_TRUE)] VARIANT_BOOL writeNul);
+
+  /**
+   * \brief Get the length in characters of an ansi/wide string in the remote process.
+   *
+   * \param remoteAddr The remote address where the string is located.
+   * \param asAnsi     True if querying an Ansi string.
+   * \param value      Returns the string's characters count not including the NUL terminating char.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Get the length in characters of an ansi/wide string in the remote process"),
+   id(dispidNktProcessMemoryStringLength)]
+  HRESULT StringLength([in] my_ssize_t remoteAddr, [in] VARIANT_BOOL asAnsi, [out, retval] LONG *value);
+
+  /**
+   * \brief Read a signed byte value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write a signed byte value from/to the specified remote address"),
+   id(dispidNktProcessMemoryCharVal)]
+  HRESULT CharVal([in] my_ssize_t remoteAddr, [out, retval] signed char *value);
+
+  /**
+   * \brief Write a signed byte value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write a signed byte value from/to the specified remote address"),
+   id(dispidNktProcessMemoryCharVal)]
+  HRESULT CharVal([in] my_ssize_t remoteAddr, [in] signed char newValue);
+
+  /**
+   * \brief Read an unsigned byte value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write an unsigned byte value from/to the specified remote address"),
+   id(dispidNktProcessMemoryByteVal)]
+  HRESULT ByteVal([in] my_ssize_t remoteAddr, [out, retval] unsigned char *value);
+
+  /**
+   * \brief Write an unsigned byte value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write an unsigned byte value from/to the specified remote address"),
+   id(dispidNktProcessMemoryByteVal)]
+  HRESULT ByteVal([in] my_ssize_t remoteAddr, [in] unsigned char newValue);
+
+  /**
+   * \brief Read a signed word value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write a signed word value from/to the specified remote address"),
+   id(dispidNktProcessMemoryShortVal)]
+  HRESULT ShortVal([in] my_ssize_t remoteAddr, [out, retval] short *value);
+
+  /**
+   * \brief Write a signed word value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write a signed word value from/to the specified remote address"),
+   id(dispidNktProcessMemoryShortVal)]
+  HRESULT ShortVal([in] my_ssize_t remoteAddr, [in] short newValue);
+
+  /**
+   * \brief Read an unsigned word value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write an unsigned word value from/to the specified remote address"),
+   id(dispidNktProcessMemoryUShortVal)]
+  HRESULT UShortVal([in] my_ssize_t remoteAddr, [out, retval] unsigned short *value);
+
+  /**
+   * \brief Write an unsigned word value to the specified remote address.
+   *
+   * \param remoteAddr The remote address.
+   * \param newValue   The new value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+
+  [propput, helpstring("Read/Write an unsigned word value from/to the specified remote address"),
+   id(dispidNktProcessMemoryUShortVal)]
+  HRESULT UShortVal([in] my_ssize_t remoteAddr, [in] unsigned short newValue);
+
+  /**
+   * \brief Read a signed doubleword value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write a signed doubleword value from/to the specified remote address"),
+   id(dispidNktProcessMemoryLongVal)]
+  HRESULT LongVal([in] my_ssize_t remoteAddr, [out, retval] long *value);
+
+  /**
+   * \brief Write a signed doubleword value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write a signed doubleword value from/to the specified remote address"),
+   id(dispidNktProcessMemoryLongVal)]
+  HRESULT LongVal([in] my_ssize_t remoteAddr, [in] long newValue);
+
+  /**
+   * \brief Read an unsigned doubleword value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write an unsigned doubleword value from/to the specified remote address"),
+   id(dispidNktProcessMemoryULongVal)]
+  HRESULT ULongVal([in] my_ssize_t remoteAddr, [out, retval] unsigned long *value);
+
+  /**
+   * \brief Write an unsigned doubleword value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write an unsigned doubleword value from/to the specified remote address"),
+   id(dispidNktProcessMemoryULongVal)]
+  HRESULT ULongVal([in] my_ssize_t remoteAddr, [in] unsigned long newValue);
+
+  /**
+   * \brief Read a signed quadword value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write a signed quadword value from/to the specified remote address"),
+   id(dispidNktProcessMemoryLongLongVal)]
+  HRESULT LongLongVal([in] my_ssize_t remoteAddr, [out, retval] __int64 *value);
+
+  /**
+   * \brief Write a signed quadword value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write a signed quadword value from/to the specified remote address"),
+   id(dispidNktProcessMemoryLongLongVal)]
+  HRESULT LongLongVal([in] my_ssize_t remoteAddr, [in] __int64 newValue);
+
+  /**
+   * \brief Read an unsigned quadword value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write an unsigned quadword value from/to the specified remote address"),
+   id(dispidNktProcessMemoryULongLongVal)]
+  HRESULT ULongLongVal([in] my_ssize_t remoteAddr, [out, retval] unsigned __int64 *value);
+
+  /**
+   * \brief Write an unsigned quadword value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write an unsigned quadword value from/to the specified remote address"),
+   id(dispidNktProcessMemoryULongLongVal)]
+  HRESULT ULongLongVal([in] my_ssize_t remoteAddr, [in] unsigned __int64 newValue);
+
+  /**
+   * \brief Read a signed integral sized value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write a signed integral sized value from/to the specified remote address"),
+   id(dispidNktProcessMemorySSizeTVal)]
+  HRESULT SSizeTVal([in] my_ssize_t remoteAddr, [out, retval] my_ssize_t *value);
+
+  /**
+   * \brief Write a signed integral sized value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write a signed integral sized value from/to the specified remote address"),
+   id(dispidNktProcessMemorySSizeTVal)]
+  HRESULT SSizeTVal([in] my_ssize_t remoteAddr, [in] my_ssize_t newValue);
+
+  /**
+   * \brief Read an unsigned integral sized value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write an unsigned integral sized value from/to the specified remote address"),
+   id(dispidNktProcessMemorySizeTVal)]
+  HRESULT SizeTVal([in] my_ssize_t remoteAddr, [out, retval] my_size_t *value);
+
+  /**
+   * \brief Write an unsigned integral sized value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write an unsigned integral sized value from/to the specified remote address"),
+   id(dispidNktProcessMemorySizeTVal)]
+  HRESULT SizeTVal([in] my_ssize_t remoteAddr, [in] my_size_t newValue);
+
+  /**
+   * \brief Read a single precision floating point value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write a single precision floating point value from/to the specified remote "
+                       "address"),
+   id(dispidNktProcessMemoryFloatVal)]
+  HRESULT FloatVal([in] my_ssize_t remoteAddr, [out, retval] float *value);
+
+  /**
+   * \brief Write a single precision floating point value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write a single precision floating point value from/to the specified remote "
+                       "address"),
+   id(dispidNktProcessMemoryFloatVal)]
+  HRESULT FloatVal([in] my_ssize_t remoteAddr, [in] float newValue);
+
+  /**
+   * \brief Read a double precision floating point value from the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to read the value.
+   * \param value      Returns the readed value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Read/Write a double precision floating point value from/to the specified remote "
+                       "address"),
+   id(dispidNktProcessMemoryDoubleVal)]
+  HRESULT DoubleVal([in] my_ssize_t remoteAddr, [out, retval] double *value);
+
+  /**
+   * \brief Write a double precision floating point value in the specified remote address.
+   *
+   * \param remoteAddr The remote address from which to write the value.
+   * \param newValue   The value to write.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Read/Write a double precision floating point value from/to the specified remote "
+                       "address"),
+   id(dispidNktProcessMemoryDoubleVal)]
+  HRESULT DoubleVal([in] my_ssize_t remoteAddr, [in] double newValue);
+
+  /**
+   * \brief Allocate a block of memory in the remote process.
+   *
+   * \param bytes       The size of the region to allocate in bytes.
+   * \param executeFlag True if the memory region should allow execition of code.
+   * \param value       Returns the address of the allocated memory block.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+
+  [helpstring("Allocate a block of memory in the remote process"),
+   id(dispidNktProcessMemoryAllocMem)]
+  HRESULT AllocMem([in] my_ssize_t bytes, [in] VARIANT_BOOL executeFlag, [out, retval] my_ssize_t *value);
+
+  /**
+   * \brief Free a block of memory in the remote process.
+   *
+   * \param remoteAddr The remote address of the block of memory to free.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Free a block of memory in the remote process"),
+   id(dispidNktProcessMemoryFreeMem)]
+  HRESULT FreeMem([in] my_ssize_t remoteAddr);
+};
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+
+/**
+ * \interface INktJavaObject
+ *
+ * \brief Interface for Java object accessor.
+ *
+ * A Java object accessor is an interface that acts like a bridge between your application and the real java object
+ * in the target process.\n
+ */
+[
+  object,
+  uuid(BE743FBA-5402-4e06-92B3-B32FEE4C9BA9),
+  dual, oleautomation, local,
+  nonextensible,
+  helpstring("INktJavaObject Interface"),
+  pointer_default(unique)
+]
+interface INktJavaObject : IDispatch
+{
+  /**
+   * \brief Invoke a Java object method.
+   *
+   * \param methodName The name of the method to invoke.
+   * \param parameters An optional array of parameters.
+   * \param result     Will hold the result of the method call.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Invoke a Java object method"),
+   id(dispidNktJavaObjectInvokeMethod)]
+  HRESULT InvokeMethod([in] BSTR methodName, [in] VARIANT parameters, [out,retval] VARIANT *result);
+
+  /**
+   * \brief Invoke a Java object superclass method.
+   *
+   * \param methodName     The name of the method to invoke.
+   * \param superClassName Name of the base class to utilize.
+   * \param parameters     An optional array of parameters.
+   * \param result         Will hold the result of the method call.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Invokes a Java object superclass method"),
+   id(dispidNktJavaObjectInvokeSuperclassMethod)]
+  HRESULT InvokeSuperclassMethod([in] BSTR methodName, [in] BSTR superClassName, [in] VARIANT parameters,
+                                 [out,retval] VARIANT *result);
+
+  /**
+   * \brief Get the value of a Java object's field.
+   *
+   * \param fieldName The name of the object's field to get.
+   * \param value     Return the current field's value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Sets/Gets a Java object's field"),
+   id(dispidNktJavaObjectSetGetField)]
+  HRESULT Field([in] BSTR fieldName, [out,retval] VARIANT *value);
+
+  /**
+   * \brief Set the value of a Java object's static field.
+   *
+   * \param fieldName The name of the object's field to set.
+   * \param newValue  The new value to set.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Sets/Gets a Java object's field"),
+   id(dispidNktJavaObjectSetGetField)]
+  HRESULT Field([in] BSTR fieldName, [in] VARIANT newValue);
+
+  /**
+   * \brief Get the value of a Java object's field.
+   *
+   * \param fieldName      The name of the object's field to get.
+   * \param superClassName The name of the superclass which the field belongs to.
+   * \param value          Return the current field's value.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propget, helpstring("Sets/Gets a Java object's field"),
+   id(dispidNktJavaObjectSetGetSuperclassField)]
+  HRESULT SuperclassField([in] BSTR fieldName, [in] BSTR superClassName, [out,retval] VARIANT *value);
+
+  /**
+   * \brief Set the value of a Java object's static field.
+   *
+   * \param fieldName      The name of the object's field to set.
+   * \param superClassName The name of the superclass which the field belongs to.
+   * \param newValue       The new value to set.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [propput, helpstring("Sets/Gets a Java object's field"),
+   id(dispidNktJavaObjectSetGetSuperclassField)]
+  HRESULT SuperclassField([in] BSTR fieldName, [in] BSTR superClassName, [in] VARIANT newValue);
+
+  /**
+   * \brief Check if two objects points to the same instance.
+   *
+   * \param javaObj A java object to compare.
+   * \param isSame Return true if the invoking object references the same object than pJavaObj points.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Check if two objects points to the same instance"),
+   id(dispidNktJavaObjectIsSameObject)]
+  HRESULT IsSameObject([in] INktJavaObject *javaObj, [out,retval] VARIANT_BOOL *isSame);
+
+  /**
+   * \brief Get the object's class name.
+   *
+   * \param className Return the java object's class named.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Get the object's class name"),
+   id(dispidNktJavaObjectGetClassName)]
+  HRESULT GetClassName([out,retval] BSTR *className);
+
+  /**
+   * \brief Check if this object is an instance of the named class.
+   *
+   * \param className  The name of the class to compare.
+   * \param isInstance Return true if the invoking object is an instance of the given class.
+   *
+   * \return S_OK on success or a HRESULT error code.
+   */
+  [helpstring("Check if this object is an instance of the named class"),
+   id(dispidNktJavaObjectIsInstanceOf)]
+  HRESULT IsInstanceOf([in] BSTR className, [out,retval] VARIANT_BOOL *isInstance);
+}
+
+//-----------------------------------------------------------
+//-----------------------------------------------------------
+
+[
+  uuid(AAAB0FBF-AD81-430d-A137-2BB487A0D9FD),
+  version(1.0),
+  helpstring("RemoteBridge 1.0 Type Library")
+]
+library RemoteBridge
+{
+  importlib("stdole2.tlb");
+
+  [v1_enum] enum eNktProtection;
+
+  //---------------------------------------------------------
+  //---------------------------------------------------------
+
+  /**
+  \brief Defines the DNktRemoteBridgeEvents events.
+  */
+  [
+    uuid(2AF20C81-4CD4-4165-94F7-D25BE636086A),
+    helpstring("DNktRemoteBridgeEvents Interface")
+  ]
+  dispinterface DNktRemoteBridgeEvents
+  {
+  properties:
+  methods:
+    /*
+    [helpstring("Called when a windows message is posted in a message queue"),
+     id(dispidNktRemoteBridgeEventsOnWndProc)]
+    HRESULT OnWndProc([in] LONG procId, [in] my_ssize_t hWnd, [in] LONG msg, [in] my_ssize_t wParam,
+                      [in] my_ssize_t lParam, [out,retval] my_ssize_t *lResult);
+    */
+
+    /**
+     * \brief Called when a process is created within a hooked process.
+     *
+     * \param procId         The parent process ID.
+     * \param childPid       The id of the newly created process.
+     * \param mainThreadId   The main thread id of the newly created process.
+     * \param is64BitProcess True if the new process is 64-bit or false if 32-bits.
+     */
+    [helpstring("Called when a process is created within a hooked process"),
+     id(dispidNktRemoteBridgeEventsOnCreateProcessCall)]
+    HRESULT OnCreateProcessCall([in] LONG procId, [in] LONG childPid, [in] LONG mainThreadId,
+                                [in] VARIANT_BOOL is64BitProcess);
+
+    /**
+     * \brief Called when a process is automatically unhooked by the system.
+     *
+     * \param procId The id of the process being unhooked.
+     */
+    [helpstring("Called when a process is automatically unhooked by the system"),
+     id(dispidNktRemoteBridgeEventsOnProcessUnhooked)]
+    HRESULT OnProcessUnhooked([in] LONG procId);
+
+    /**
+     * \brief Called when an interface is created.
+     *
+     * \param procId    The id of the process raising the event.
+     * \param threadId  The id of the thread raising the event.
+     * \param clsid     The class id guid of the created object.
+     * \param iid       The interface id guid of the created object.
+     * \param newObject The object itself.
+     *
+     * See also: INktRemoteBridge::WatchComInterface
+     */
+    [helpstring("Called when an interface is created"),
+     id(dispidNktRemoteBridgeEventsOnComInterfaceCreated)]
+    HRESULT OnComInterfaceCreated([in] LONG procId, [in] LONG threadId, [in] BSTR clsid, [in] BSTR iid,
+                                  [in] VARIANT newObject);
+
+    /**
+     * \brief Called when a Java native method is called from custom code.
+     *
+     * \param procId        The id of the process raising the event.
+     * \param className     The class name which the method belongs to.
+     * \param methodName    The name of method that was called.
+     * \param objectOrClass An instance to a java object or class.
+     * \param parameters    An array of parameters passed when the method was invoked.
+     * \param retValue      A custom value to return to the caller.
+     *
+     * See also: INktRemoteBridge::DefineJavaClass
+     */
+    [helpstring("Called when a Java native method is called from custom code"),
+     id(dispidNktRemoteBridgeEventsOnJavaCustomNativeCall)]
+    HRESULT OnJavaCustomNativeCall([in] LONG procId, [in] BSTR className, [in] BSTR methodName,
+                                   [in] INktJavaObject *objectOrClass, [in] SAFEARRAY(VARIANT) *parameters,
+                                   [out] VARIANT *retValue);
+  };
+
+  //---------------------------------------------------------
+  //---------------------------------------------------------
+
+  /**
+  \brief Implements the INktRemoteBridge interface.
+  */
+  [
+    uuid(D418B9B0-D11C-42af-A951-B3369680E080),
+    helpstring("RemoteBridge Class")
+  ]
+  coclass NktRemoteBridge
+  {
+    [default] interface INktRemoteBridge;
+    [default, source] dispinterface DNktRemoteBridgeEvents;
+  };
+
+  //---------------------------------------------------------
+  //---------------------------------------------------------
+
+  /**
+  \brief Implements the INktProcessMemory interface.
+  */
+  [
+    uuid(7EDFEE7F-6458-4107-8344-518BE2980733),
+    helpstring("NktProcessMemory Class")
+  ]
+  coclass NktProcessMemory
+  {
+    [default] interface INktProcessMemory;
+  };
+
+  //---------------------------------------------------------
+  //---------------------------------------------------------
+
+  /**
+  \brief Implements the INktJavaObject interface.
+  */
+  [
+    uuid(234D451D-DED1-4320-95B0-D22F846726DF),
+    helpstring("NktJavaObject Class")
+  ]
+  coclass NktJavaObject
+  {
+    [default] interface INktJavaObject;
+  };
+};

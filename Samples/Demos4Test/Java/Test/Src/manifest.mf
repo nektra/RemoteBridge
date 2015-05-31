@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Implementation-Vendor: Nektra
+Implementation-Title: RemoteBridge Java Test
+Implementation-Version: 1.0
+Specification-Vendor: Nektra S.A.
+Main-Class: JavaTest
+
