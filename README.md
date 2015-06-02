@@ -42,14 +42,21 @@ The examples provided will show the power of this library. For e.g.,
 To use RemoteBridge you must have the following:
 
 - IBM PC or compatible.
-- Microsoft Windows 2000 or later.
-- Visual Studio 2008 or later (with latest available Service Pack recommended).
+- Microsoft Windows XP or later.
+- Visual Studio 2012 with Update 4 (or newer) installed.
 
 
 ----------------------
 # INSTALLATION & USAGE
 
-Uncompress the downloaded .zip file in an empty folder.
+Download RemoteBridge from GitHub by executing the following Git command:
+
+    git clone --recursive https://github.com/nektra/RemoteBridge.git
+
+Instead, if you decide to downloaded the .zip file from GitHub , uncompress it
+in an empty folder and then download and uncompress the Deviare In-Proc
+dependency (from https://github.com/nektra/Deviare-InProc) inside the following
+subdirectory: "Dependencies\Deviare-InProc".
 
 To use the library in your project, add the reference to the COM object located
 in RemoteBridge.dll or RemoteBridge64.dll depending on the target platform.
@@ -60,7 +67,7 @@ recommend to add the Nektra.RemoteBridge.dll reference instead.
 RemoteBridge supports RegFree-COM model by adding the corresponding manifest
 file to your application. If you want to use the standard COM mechanism,
 remember to register RemoteBridge.dll and/or RemoteBridge64.dll using the
-REGSVR32 utility located in the "%sysroot%\system32" folder.
+RegSvr32 utility located in the "%sysroot%\system32" folder.
 
 
 ----------------------
