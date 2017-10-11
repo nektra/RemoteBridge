@@ -10,7 +10,7 @@ interact with it in any way, for e.g., setting/getting properties, calling
 methods, etc., like if you were running custom injected code inside the target
 application.
 
-Most of times, objects managed by an application are not accesible from outside.
+Most of times, objects managed by an application are not accessible from outside.
 Also, although you can inject and hook custom code in an application, those kind
 of objects cannot be easily reached.
 
@@ -21,7 +21,7 @@ your application. It also creates a wrapper interface for all JAVA objects.
 RemoteBridge uses a COM interface supported by most programming languages such
 as C++, Delphi, VB, VBA, VB.SCRIPT, VB.NET, C# and Python. COM objects used by
 the third-party application will be directly available as COM-proxy objects in
-your code. For java ones, an interface named INktJavaObject is provided as a
+your code. For Java ones, an interface named INktJavaObject is provided as a
 wrapper.
 
 The examples provided will show the power of this library. For e.g.,
@@ -29,7 +29,7 @@ The examples provided will show the power of this library. For e.g.,
 - Inspect the new IFileOpenDialog COM object (introduced in Windows Vista) used
   in the classic File Open dialog box and retrieve the current typed file name.
 - Retrieve the internal IHTMLDocument2 COM object in Internet Explorer, add
-  a custom OnDocumentComplete event handler and modify page html code.
+  a custom OnDocumentComplete event handler and modify page HTML code.
 - Add custom panels and change object properties in the Java Notepad application
   provided in the Java Development Kit.
 - Inject custom Java code into a target application and interact with it by
@@ -73,7 +73,7 @@ RegSvr32 utility located in the "%sysroot%\system32" folder.
 ----------------------
 # NOTES ON COM HOOKING
 
-1. The following interfaces are not hookeable. They are mainly used by OLE32
+1. The following interfaces are not hookable. They are mainly used by OLE32
    internally and most of them are not available to the end user:
 
    IID_IGlobalInterfaceTable, IID_IRunningObjectTable, IID_IAggregator,
@@ -91,11 +91,11 @@ RegSvr32 utility located in the "%sysroot%\system32" folder.
    using a non-standard marshalling mechanism). If you can't access an object,
    check if it is registered in Windows' Registry.
 
-3. Some interfaces are not instatiated as expected. For e.g., if you hook the
+3. Some interfaces are not instantiated as expected. For e.g., if you hook the
    IHTMLDocument interface that belongs to the CLSID_HtmlDocument object, you
    may encounter that the object is created using the IUnknown interface
    instead. Use the 'flgDebugPrintInterfaces' flag to get information about
-   how different interfaces are instatiated.
+   how different interfaces are instantiated.
 
 
 -------------
